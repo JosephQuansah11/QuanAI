@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.quanai/
+workspace/
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+.DS_Store

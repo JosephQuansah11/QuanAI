@@ -1,0 +1,8 @@
+# Core runtime (installed by `pip install -e .` too)
+python-pptx>=0.6.21
+pillow>=9.0
+numpy>=1.23
+imageio-ffmpeg>=0.4.9
+
+# Development
+pytest>=7.0
