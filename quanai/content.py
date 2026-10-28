@@ -193,10 +193,10 @@ ARTIFACT_WORDS = (
     "short", "program", "tool", "script",
 )
 
+# purely stylistic words that carry no subject matter
 FILLER_PREFIXES = (
-    "abstract", "minimal", "minimalist", "modern", "simple", "clean", "cool", "nice",
-    "beautiful", "professional", "sleek", "bold", "stunning", "quick", "small", "little",
-    "complete", "full", "entire", "new",
+    "abstract", "minimal", "minimalist", "modern", "simple", "sleek", "stunning",
+    "nice", "cool", "beautiful", "professional", "quick", "clean-looking",
 )
 
 
