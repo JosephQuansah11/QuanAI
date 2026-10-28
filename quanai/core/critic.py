@@ -50,6 +50,14 @@ class Decision:
         }
 
 
+def _next_light_theme(current: str | None) -> str:
+    from ..tools.slides import DEFAULT_THEME, LIGHT_THEMES
+
+    if current not in LIGHT_THEMES:
+        return DEFAULT_THEME
+    return LIGHT_THEMES[(LIGHT_THEMES.index(current) + 1) % len(LIGHT_THEMES)]
+
+
 class Critic:
     def __init__(self, config=None, provider=None, memory: Memory | None = None) -> None:
         self.config = config
@@ -195,11 +203,11 @@ class Critic:
             args["backend"] = "procedural"
             strategy = "fallback-procedural-art"
         elif tool == "slides.create":
-            slides = source.result.get("data", {}).get("slides") if source.result else None
             if isinstance(args.get("slides"), str) or not args.get("slides"):
                 args["slides"] = "${deck.plan::slides}"
-            args["theme"] = "paper" if args.get("theme") != "paper" else "forest"
-            strategy = "alternate-theme"
+            # rotate through the light palettes; dark is opt-in only
+            args["theme"] = _next_light_theme(args.get("theme"))
+            strategy = "alternate-light-theme"
         elif tool == "video.from_images":
             args["zoom"] = False
             args["width"] = min(int(args.get("width", 1280)), 960)

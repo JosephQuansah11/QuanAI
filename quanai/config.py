@@ -54,6 +54,7 @@ class Config:
 
     # Capability backends.
     image_backend: str = "auto"  # auto | procedural | pollinations | sd
+    theme: str = "paper"         # deck palette; light by default
     asr_command: str | None = None
     allow_shell: bool = False
     allow_network: bool = False
@@ -80,6 +81,7 @@ class Config:
             vision_model=_env("QUANAI_VISION_MODEL"),
             llm_timeout=float(_env("QUANAI_LLM_TIMEOUT", "120")),
             image_backend=_env("QUANAI_IMAGE_BACKEND", "auto") or "auto",
+            theme=_env("QUANAI_THEME", "paper") or "paper",
             asr_command=_env("QUANAI_ASR_CMD"),
             allow_shell=_env_bool("QUANAI_ALLOW_SHELL", False),
             allow_network=_env_bool("QUANAI_ALLOW_NETWORK", False),
@@ -119,6 +121,7 @@ class Config:
             "base_url": self.base_url or "",
             "model": self.model or "",
             "image_backend": self.image_backend,
+            "theme": self.theme,
             "allow_shell": self.allow_shell,
             "allow_network": self.allow_network,
             "max_iterations": self.max_iterations,

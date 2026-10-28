@@ -278,3 +278,13 @@ def test_status_is_blocked_when_iteration_budget_runs_out(config):
     assert report.status == "blocked"
     assert report.verified is False
     assert report.blocked_reason
+
+
+def test_repair_alternates_between_light_themes():
+    from quanai.core.critic import _next_light_theme
+    from quanai.tools.slides import DEFAULT_THEME, LIGHT_THEMES
+
+    assert _next_light_theme(None) == DEFAULT_THEME
+    assert _next_light_theme("midnight") == DEFAULT_THEME
+    assert _next_light_theme(DEFAULT_THEME) != DEFAULT_THEME  # a repair changes the look
+    assert {_next_light_theme(name) for name in LIGHT_THEMES} == set(LIGHT_THEMES)

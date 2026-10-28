@@ -102,15 +102,15 @@ def analyse_audio(wav: Path, out_dir: Path, label: str = "audio") -> dict:
 
     # waveform
     width, height = 1000, 260
-    canvas = Image.new("RGB", (width, height), (12, 18, 32))
+    canvas = Image.new("RGB", (width, height), (247, 248, 250))
     draw = ImageDraw.Draw(canvas)
-    draw.line([(0, height // 2), (width, height // 2)], fill=(40, 60, 90), width=1)
+    draw.line([(0, height // 2), (width, height // 2)], fill=(209, 213, 219), width=1)
     step = max(1, len(rms) // width)
     bars = rms[::step][:width]
     scale = (height / 2 - 8) / max(float(bars.max()), 1e-6)
     for x, value in enumerate(bars):
         half = float(value) * scale
-        draw.line([(x, height / 2 - half), (x, height / 2 + half)], fill=(56, 189, 248), width=1)
+        draw.line([(x, height / 2 - half), (x, height / 2 + half)], fill=(37, 99, 235), width=1)
     waveform = out_dir / f"{label}_waveform.png"
     canvas.save(waveform)
 
@@ -125,7 +125,8 @@ def analyse_audio(wav: Path, out_dir: Path, label: str = "audio") -> dict:
         spectrum = np.abs(np.fft.rfft(block, axis=1))[:, :256]
         spectrum = np.log1p(spectrum)
         spectrum = spectrum / max(float(spectrum.max()), 1e-6)
-        img = Image.fromarray((spectrum.T[::-1] * 255).astype("uint8"), mode="L")
+        # inverted: silence reads as paper, energy as ink
+        img = Image.fromarray((255 - spectrum.T[::-1] * 255).astype("uint8"), mode="L")
         img = img.resize((720, 300)).convert("RGB")
         spectrogram = out_dir / f"{label}_spectrogram.png"
         img.save(spectrogram)
@@ -180,7 +181,7 @@ def contact_sheet(frames: list[Path], out: Path, columns: int = 3, thumb_width: 
     cols = max(1, min(int(columns), len(thumbs)))
     rows = math.ceil(len(thumbs) / cols)
     cell_h = max(t.height for t in thumbs)
-    sheet = Image.new("RGB", (cols * thumb_width, rows * cell_h), (12, 18, 32))
+    sheet = Image.new("RGB", (cols * thumb_width, rows * cell_h), (247, 248, 250))
     for index, thumb in enumerate(thumbs):
         x = (index % cols) * thumb_width
         y = (index // cols) * cell_h

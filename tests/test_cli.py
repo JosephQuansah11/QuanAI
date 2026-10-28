@@ -111,3 +111,19 @@ def test_importing_the_package_does_not_run_the_cli():
     assert result.returncode == 0, result.stderr
     assert "imported without running" in result.stdout
     assert "usage: quanai" not in result.stderr
+
+
+def test_theme_flag_works_before_and_after_the_subcommand(tmp_path: Path, capsys):
+    from pptx import Presentation
+
+    assert main(["--workspace", str(tmp_path / "a"), "--home", str(tmp_path / "ha"),
+                 "run", "a 4 slide deck about solar energy", "--theme", "sky"]) == 0
+    deck = next((tmp_path / "a").glob("obj-*/deck.pptx"))
+    assert str(Presentation(str(deck)).slides[0].background.fill.fore_color.rgb) == "F5F9FF"
+
+    assert main(["--theme", "mint", "--workspace", str(tmp_path / "b"),
+                 "--home", str(tmp_path / "hb"),
+                 "run", "a 4 slide deck about solar energy"]) == 0
+    deck = next((tmp_path / "b").glob("obj-*/deck.pptx"))
+    assert str(Presentation(str(deck)).slides[0].background.fill.fore_color.rgb) == "F4FAF7"
+    assert "sky" not in capsys.readouterr().out

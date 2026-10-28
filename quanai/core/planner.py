@@ -25,6 +25,8 @@ from ..content import (
 )
 from ..util import keywords, now_iso, slugify
 from .memory import Memory
+from ..tools.slides import DEFAULT_THEME as LIGHT_THEME_DEFAULT
+from ..tools.slides import THEMES
 from .task import Check, Objective, Requirement, Status, Task
 
 
@@ -229,7 +231,9 @@ class Planner:
         topic = topic_of(request)
         # requirement terms must be subject words, never format words like "slide"
         kws = keywords(topic, 4) or [topic]
-        theme = "midnight"
+        # light by default; an explicit --theme (or dark palette) still wins
+        requested_theme = getattr(self.config, "theme", LIGHT_THEME_DEFAULT)
+        theme = requested_theme if requested_theme in THEMES else LIGHT_THEME_DEFAULT
         hero = image_prompts(request, 2)
         min_slides = max(4, total - 2)
         # text volume must scale with the requested length, not a fixed number

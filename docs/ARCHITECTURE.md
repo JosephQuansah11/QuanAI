@@ -93,7 +93,7 @@ Repair strategies by tool:
 
 | Tool | Changed on repair |
 | --- | --- |
-| `slides.create` | alternate theme, slides resolved from the plan file |
+| `slides.create` | next light palette (paper → sky → mint → sand), slides resolved from the plan file |
 | `video.from_images` | zoom off, smaller frame size, longer per-image duration |
 | `video.storyboard` | smaller cards |
 | `image.*` | procedural backend, different style, more variants |
@@ -130,3 +130,27 @@ manifests and the critic talk about.
 Given the same request, the same machine and no model, QuanAI produces byte-stable
 images (seeded renderer), stable plans and stable task ids. That makes regressions
 visible and tests meaningful.
+
+## 9. Look and feel: light by default
+
+Every artifact QuanAI produces is light unless a user explicitly asks otherwise:
+
+| Surface | Where the palette lives | Default |
+| --- | --- | --- |
+| Decks | `tools/slides.py` → `THEMES`, `LIGHT_THEMES`, `DEFAULT_THEME` | `paper` (also `sky`, `mint`, `sand`) |
+| Desktop / mobile UI | `tools/apps.py` → `TKINTER_MAIN`, `PYQT_MAIN`, `APP_CSS`, Flutter/RN styles | near-white `#f7f8fa` surfaces, `#111827` ink, `#2563eb` accent |
+| Video cards | `tools/video.py` → `compose_card` | light veil + dark caption text |
+| Generated art | `tools/images.py` → `LIGHT_STOPS` | pastel palette, gentle vignette |
+| Analysis visuals | `tools/media.py` | paper background waveform, inverted spectrogram |
+| App icons / manifest | `tools/apps.py` → `_icon`, manifest builder | light icon, `#f7f8fa` splash |
+
+Dark palettes (`midnight`, `forest`, `plum`) and dark art (`light: false`) still exist but
+are opt-in. Choosing a palette is explicit: `quanai run "..." --theme sky`, or
+`QUANAI_THEME=sand`. An unknown theme name falls back to `paper` rather than failing.
+
+The critic rotates through the light palettes when repairing a deck
+(`_next_light_theme`), so a repair always changes the look without going dark.
+
+`tests/test_light_theme.py` enforces all of this: it renders a real deck, all six app
+frameworks, storyboard cards, icons and analysis images, then asserts luminance and
+WCAG contrast (body ≥ 7:1, muted and accent ≥ 4.5:1).

@@ -40,7 +40,7 @@ def compose_card(
     subtitle: str = "",
     width: int = 1280,
     height: int = 720,
-    accent: tuple[int, int, int] = (56, 189, 248),
+    accent: tuple[int, int, int] = (37, 99, 235),
 ) -> "object":
     """Build a title card: background image (or flat colour) plus caption text."""
     from PIL import Image, ImageDraw, ImageFilter  # type: ignore
@@ -54,9 +54,9 @@ def compose_card(
         base = base.crop((left, top, left + width, top + height))
         base = base.filter(ImageFilter.GaussianBlur(1.2))
     else:
-        base = Image.new("RGB", (width, height), (12, 18, 32))
+        base = Image.new("RGB", (width, height), (247, 248, 250))
 
-    shade = Image.new("RGBA", (width, height), (4, 8, 18, 168))
+    shade = Image.new("RGBA", (width, height), (250, 250, 247, 172))
     canvas = Image.alpha_composite(base.convert("RGBA"), shade)
     draw = ImageDraw.Draw(canvas)
 
@@ -81,12 +81,12 @@ def compose_card(
 
     y = int(height * 0.36)
     for line in wrap(title, title_font, width - 2 * margin - 40):
-        draw.text((margin + 34, y), line, font=title_font, fill=(250, 250, 252))
+        draw.text((margin + 34, y), line, font=title_font, fill=(17, 24, 39))
         y += int(height * 0.095)
     if subtitle:
         y += int(height * 0.02)
         for line in wrap(subtitle, sub_font, width - 2 * margin - 40):
-            draw.text((margin + 34, y), line, font=sub_font, fill=(176, 190, 208))
+            draw.text((margin + 34, y), line, font=sub_font, fill=(75, 85, 99))
             y += int(height * 0.052)
     return canvas.convert("RGB")
 

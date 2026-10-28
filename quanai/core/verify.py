@@ -218,7 +218,7 @@ def _image_valid(
     path: str,
     min_width: int = 32,
     min_height: int = 32,
-    min_variance: float = 20.0,
+    min_variance: float = 10.0,  # airy light art sits well below the old 20 floor
     **_: Any,
 ):
     from ..probe import image_info

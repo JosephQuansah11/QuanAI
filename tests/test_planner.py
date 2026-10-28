@@ -144,3 +144,30 @@ def test_explicit_slide_count_is_honoured(planner):
     assert plan_task.args["slides"] == 5
     requirement = next(req for req in plan.requirements if req.id == "R.deck")
     assert requirement.checks[0].params["min_slides"] == 4
+
+
+def test_deck_planning_uses_a_light_theme(planner):
+    from quanai.tools.slides import DEFAULT_THEME, LIGHT_THEMES
+
+    plan = planner.plan(Objective.new("create a 6 slide deck about solar energy"))
+    plan_task = next(task for task in plan.tasks if task.tool == "plan.deck")
+    assert plan_task.args["theme"] in LIGHT_THEMES
+    assert plan_task.args["theme"] == DEFAULT_THEME
+
+
+def test_configured_theme_is_used_and_unknown_theme_falls_back(config, registry):
+    from quanai.tools.slides import DEFAULT_THEME
+
+    config.theme = "sand"
+    chosen = Planner(config, registry, provider=None).plan(
+        Objective.new("a 5 slide deck about solar energy")
+    )
+    plan_task = next(task for task in chosen.tasks if task.tool == "plan.deck")
+    assert plan_task.args["theme"] == "sand"
+
+    config.theme = "neon-vaporwave"
+    fallback = Planner(config, registry, provider=None).plan(
+        Objective.new("a 5 slide deck about wind energy")
+    )
+    plan_task = next(task for task in fallback.tasks if task.tool == "plan.deck")
+    assert plan_task.args["theme"] == DEFAULT_THEME

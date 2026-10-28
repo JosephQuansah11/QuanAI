@@ -40,26 +40,45 @@ def _rng(seed_parts, seed: int = 0):
     return np.random.default_rng((fingerprint + int(seed) * 7919) % (2**32))
 
 
-def _palette(rng, style: str) -> list[tuple[int, int, int]]:
+# Light palettes are the default: airy tints for the wash, one deeper hue for
+# structure. Dark stops are only used when somebody explicitly asks for them.
+LIGHT_STOPS = (
+    (0.0, 0.10, 0.99),    # near-white tint
+    (1.0, 0.26, 0.95),    # pale wash
+    (2.1, 0.44, 0.84),    # mid tint for shape fills
+    (3.2, 0.70, 0.46),    # deeper hue for lines and structure
+)
+DARK_STOPS = (
+    (0.0, 0.85, 0.30),
+    (1.0, 0.75, 0.62),
+    (2.1, 0.62, 0.88),
+    (3.2, 0.45, 0.97),
+)
+
+
+def _palette(rng, style: str, light: bool = True) -> list[tuple[int, int, int]]:
     base = float(rng.random())
     spread = {
         "editorial": 0.22, "minimal": 0.12, "technical": 0.30,
         "organic": 0.18, "luxury": 0.16,
     }.get(style, 0.2)
+    stops = LIGHT_STOPS if light else DARK_STOPS
     colors = []
-    for offset, saturation, value in (
-        (0.0, 0.85, 0.30),
-        (spread, 0.75, 0.62),
-        (spread * 2.1, 0.62, 0.88),
-        (spread * 3.2, 0.45, 0.97),
-    ):
-        hue = (base + offset) % 1.0
+    for offset, saturation, value in stops:
+        hue = (base + offset * spread) % 1.0
         r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
         colors.append((int(r * 255), int(g * 255), int(b * 255)))
     return colors
 
 
-def render_procedural(prompt: str, width: int = 1280, height: int = 720, seed: int = 0, style: str = "editorial"):
+def render_procedural(
+    prompt: str,
+    width: int = 1280,
+    height: int = 720,
+    seed: int = 0,
+    style: str = "editorial",
+    light: bool = True,
+):
     """Render a deterministic abstract composition for the prompt."""
     try:
         import numpy as np  # type: ignore
@@ -72,7 +91,7 @@ def render_procedural(prompt: str, width: int = 1280, height: int = 720, seed: i
     width, height = max(64, int(width)), max(64, int(height))
     tuning = STYLE_TUNING.get(style, STYLE_TUNING["editorial"])
     rng = _rng(f"{prompt}|{style}", seed)
-    palette = _palette(rng, style)
+    palette = _palette(rng, style, light)
 
     ys, xs = np.mgrid[0:height, 0:width].astype("float32")
     u = xs / max(width - 1, 1)
@@ -108,7 +127,8 @@ def render_procedural(prompt: str, width: int = 1280, height: int = 720, seed: i
     overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
     for index in range(tuning["shapes"]):
-        color = palette[(index + 1) % len(palette)] + (int(rng.integers(26, 78)),)
+        alpha = int(rng.integers(40, 112)) if light else int(rng.integers(26, 78))
+        color = palette[(index + 1) % len(palette)] + (alpha,)
         cx = float(rng.uniform(-0.1, 1.1)) * width
         cy = float(rng.uniform(-0.1, 1.1)) * height
         span = float(rng.uniform(0.12, 0.55)) * min(width, height)
@@ -130,13 +150,17 @@ def render_procedural(prompt: str, width: int = 1280, height: int = 720, seed: i
     overlay = overlay.filter(ImageFilter.GaussianBlur(radius=float(rng.uniform(0.6, 2.4))))
     image = Image.alpha_composite(image.convert("RGBA"), overlay)
 
-    # film grain + vignette so the result reads as art, not as a gradient
+    # film grain + vignette so the result reads as art, not as a gradient.
+    # Light art needs a much gentler vignette or the paper turns grey at the edges.
     arr = np.asarray(image.convert("RGB"), dtype="float32")
     grain = rng.normal(0.0, 255.0 * tuning["grain"], (height, width, 1))
     arr = arr + grain
-    vignette = 1.0 - 0.55 * (((u - 0.5) ** 2 + (v - 0.5) ** 2) * 2.2) ** 1.4
-    arr = arr * np.clip(vignette, 0.25, 1.0)[..., None]
-    arr = (arr - 127.5) * tuning["contrast"] + 127.5
+    falloff = 0.16 if light else 0.55
+    floor = 0.72 if light else 0.25
+    vignette = 1.0 - falloff * (((u - 0.5) ** 2 + (v - 0.5) ** 2) * 2.2) ** 1.4
+    arr = arr * np.clip(vignette, floor, 1.0)[..., None]
+    contrast = tuning["contrast"] if not light else 1.0 + (tuning["contrast"] - 1.0) * 0.45
+    arr = (arr - 127.5) * contrast + 127.5
     return Image.fromarray(np.clip(arr, 0, 255).astype("uint8"), mode="RGB")
 
 
@@ -198,6 +222,7 @@ def generate(
     seed: int = 0,
     style: str = "editorial",
     backend: str = "auto",
+    light: bool = True,
 ):
     """Generate one image, trying backends in the configured order."""
     target = ctx.path(path)
@@ -226,7 +251,7 @@ def generate(
                 image = render_pollinations(prompt, width, height, seed)
             else:
                 candidate = "procedural"
-                image = render_procedural(prompt, width, height, seed, style)
+                image = render_procedural(prompt, width, height, seed, style, light=bool(light))
             used = candidate
             break
         except Exception as exc:
@@ -244,11 +269,13 @@ def generate(
         "height": image.height,
         "seed": int(seed),
         "style": style,
+        "light": bool(light),
         "attempts": errors,
         "_artifacts": [
             artifact(
                 ctx, target, "image", MIME,
-                width=image.width, height=image.height, backend=used, seed=int(seed), prompt=prompt[:300],
+                width=image.width, height=image.height, backend=used, seed=int(seed),
+                light=bool(light), prompt=prompt[:300],
             )
         ],
     }
@@ -268,6 +295,8 @@ def register(registry) -> None:
                 "seed": {"type": "integer", "default": 0},
                 "style": {"type": "string", "enum": list(STYLE_TUNING)},
                 "backend": {"type": "string", "enum": ["auto", "procedural", "sd", "pollinations"]},
+                "light": {"type": "boolean", "default": True,
+                          "description": "light pastel art (default) or opt-in dark art"},
             },
             "required": ["path", "prompt"],
         },
@@ -283,8 +312,9 @@ def register(registry) -> None:
         seed: int = 0,
         style: str = "editorial",
         backend: str = "auto",
+        light: bool = True,
     ) -> ToolResult:
-        data = generate(ctx, path, prompt, width, height, seed, style, backend)
+        data = generate(ctx, path, prompt, width, height, seed, style, backend, light)
         arts = data.pop("_artifacts", [])
         return ToolResult.success(
             data, [a if isinstance(a, Artifact) else Artifact(**a) for a in arts]

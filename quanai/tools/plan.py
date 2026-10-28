@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 
 from ..content import DeckPlan, app_plan, deck_plan, image_prompts, video_plan
+from .slides import DEFAULT_THEME
 from ..llm.base import Message
 from .registry import ToolContext, ToolResult, artifact
 
@@ -103,7 +104,11 @@ def register(registry) -> None:
         category="plan",
     )
     def plan_deck(
-        ctx: ToolContext, request: str, slides: int = 8, theme: str = "midnight", out: str = "plans/deck.json"
+        ctx: ToolContext,
+        request: str,
+        slides: int = 8,
+        theme: str = DEFAULT_THEME,
+        out: str = "plans/deck.json",
     ) -> ToolResult:
         from ..content import topic_of
 

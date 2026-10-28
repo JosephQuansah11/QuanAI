@@ -9,14 +9,28 @@ from .registry import ToolContext, ToolResult, artifact
 
 MIME = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 
+# Light is the default. Dark palettes stay available for people who ask for them.
 THEMES: dict[str, dict[str, str]] = {
+    "paper": {
+        "bg": "FAFAF7", "fg": "1F2937", "accent": "B45309",
+        "muted": "6B7280", "panel": "F1EFE8",
+    },
+    "sky": {
+        "bg": "F5F9FF", "fg": "0F172A", "accent": "2563EB",
+        "muted": "64748B", "panel": "E7F0FB",
+    },
+    "mint": {
+        "bg": "F4FAF7", "fg": "10352C", "accent": "047857",
+        "muted": "4F6F66", "panel": "E4F3EC",
+    },
+    "sand": {
+        "bg": "FDF8F1", "fg": "3B2F2A", "accent": "C2410C",
+        "muted": "7A6A61", "panel": "F6EADC",
+    },
+    # opt-in dark palettes
     "midnight": {
         "bg": "0F172A", "fg": "F8FAFC", "accent": "38BDF8",
         "muted": "94A3B8", "panel": "1E293B",
-    },
-    "paper": {
-        "bg": "FAFAF7", "fg": "1B1B1B", "accent": "B45309",
-        "muted": "6B7280", "panel": "EFEFEA",
     },
     "forest": {
         "bg": "0B2B26", "fg": "ECFDF5", "accent": "34D399",
@@ -27,6 +41,10 @@ THEMES: dict[str, dict[str, str]] = {
         "muted": "C4A5C9", "panel": "3B1540",
     },
 }
+
+LIGHT_THEMES = ("paper", "sky", "mint", "sand")
+DEFAULT_THEME = "paper"
+
 
 WIDTH = 13.333
 HEIGHT = 7.5
@@ -127,7 +145,7 @@ def build_deck(
     title: str,
     slides: list[dict],
     subtitle: str = "",
-    theme_name: str = "midnight",
+    theme_name: str = DEFAULT_THEME,
     author: str = "QuanAI",
 ) -> dict:
     try:
@@ -139,7 +157,7 @@ def build_deck(
     if not slides:
         raise ToolError("a deck needs at least one slide")
 
-    theme = THEMES.get(theme_name) or THEMES["midnight"]
+    theme = THEMES.get(theme_name) or THEMES[DEFAULT_THEME]
     prs = Presentation()
     prs.slide_width = Inches(WIDTH)
     prs.slide_height = Inches(HEIGHT)
@@ -253,7 +271,7 @@ def register(registry) -> None:
         title: str,
         slides: list,
         subtitle: str = "",
-        theme: str = "midnight",
+        theme: str = DEFAULT_THEME,
         author: str = "QuanAI",
     ) -> ToolResult:
         target = ctx.path(path)

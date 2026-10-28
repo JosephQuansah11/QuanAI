@@ -27,6 +27,18 @@ from .tools import build_default_registry, probe_capabilities
 from .util import human_bytes, now_iso
 
 
+GLOBAL_FLAGS = ("--workspace", "--home", "--provider", "--image-backend", "--theme")
+
+
+def add_global_flags(parser: argparse.ArgumentParser) -> None:
+    """Let global options appear after the subcommand too (e.g. run X --theme sky)."""
+    parser.add_argument("--workspace", default=argparse.SUPPRESS, help=argparse.SUPPRESS)
+    parser.add_argument("--home", default=argparse.SUPPRESS, help=argparse.SUPPRESS)
+    parser.add_argument("--provider", default=argparse.SUPPRESS, help=argparse.SUPPRESS)
+    parser.add_argument("--image-backend", default=argparse.SUPPRESS, help=argparse.SUPPRESS)
+    parser.add_argument("--theme", default=argparse.SUPPRESS, help=argparse.SUPPRESS)
+
+
 def _config(args) -> Config:
     overrides = {
         "workspace": getattr(args, "workspace", None),
@@ -34,6 +46,7 @@ def _config(args) -> Config:
         "max_iterations": getattr(args, "max_iterations", None),
         "provider": getattr(args, "provider", None),
         "image_backend": getattr(args, "image_backend", None),
+        "theme": getattr(args, "theme", None),
     }
     config = Config.from_env(**{k: v for k, v in overrides.items() if v is not None})
     return config.ensure_dirs()
@@ -163,7 +176,8 @@ def cmd_doctor(args) -> int:
 
     print(f"\nWorkspace: {config.workspace}")
     print(f"State:     {config.home}")
-    print(f"Image backend: {config.image_backend}   network: {config.allow_network}   shell: {config.allow_shell}")
+    print(f"Image backend: {config.image_backend}   deck theme: {config.theme}")
+    print(f"Network: {config.allow_network}   shell: {config.allow_shell}")
     return 0
 
 
@@ -205,6 +219,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--home", help="where agent state is stored")
     parser.add_argument("--provider", help="offline | auto | ollama | openai | lmstudio | vllm | <custom>")
     parser.add_argument("--image-backend", help="auto | procedural | sd | pollinations")
+    parser.add_argument(
+        "--theme",
+        help="deck palette: paper (default), sky, mint, sand, or an opt-in dark palette",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     run = sub.add_parser("run", help="plan, execute and verify a request")
@@ -213,10 +231,12 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--input", action="append", help="attach an input file (image/audio/video)")
     run.add_argument("--max-iterations", type=int, default=None)
     run.add_argument("--json", action="store_true", help="also print the full report as JSON")
+    add_global_flags(run)
     run.set_defaults(func=cmd_run)
 
     plan = sub.add_parser("plan", help="show the requirements and task graph without running it")
     plan.add_argument("request")
+    add_global_flags(plan)
     plan.set_defaults(func=cmd_plan)
 
     status = sub.add_parser("status", help="list objectives")
@@ -230,6 +250,7 @@ def build_parser() -> argparse.ArgumentParser:
     resume = sub.add_parser("resume", help="continue an interrupted objective")
     resume.add_argument("id")
     resume.add_argument("--max-iterations", type=int, default=None)
+    add_global_flags(resume)
     resume.set_defaults(func=cmd_resume)
 
     tools = sub.add_parser("tools", help="list the tool surface")
@@ -245,6 +266,7 @@ def build_parser() -> argparse.ArgumentParser:
     ingest.add_argument("--frames", type=int, default=6)
     ingest.add_argument("--no-transcribe", action="store_true")
     ingest.add_argument("--no-describe", action="store_true")
+    add_global_flags(ingest)
     ingest.set_defaults(func=cmd_ingest)
     return parser
 

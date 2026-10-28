@@ -120,15 +120,16 @@ slide, page numbers, a chosen theme and optional full-bleed artwork.
 quanai run "a 10 slide deck about quantum computing for investors"
 ```
 
-- Themes: `midnight`, `paper`, `forest`, `plum`
+- Light themes by default: `paper`, `sky`, `mint`, `sand` — light background, dark ink, every text colour ≥ 4.5:1 contrast
+- Dark palettes (`midnight`, `forest`, `plum`) stay available as opt-in via the `theme` argument
 - Pipeline: `plan.deck` (writes `plans/deck.json`) → `image.variations` (cover art) → `slides.create`
 - Verified by: slide count, text volume, subject term present, notes per slide
 
 ### 2. Images
 
-Deterministic procedural art: seeded plasma field, palette wash, layered geometry,
-grain and vignette. Same prompt + seed always produces the same image, so outputs are
-reproducible and reviewable.
+Deterministic procedural art in a light, airy palette: seeded plasma field, pastel
+wash, layered geometry, fine grain. Same prompt + seed always produces the same image,
+so outputs are reproducible and reviewable. Dark art is opt-in (`light: false`).
 
 ```bash
 quanai run "generate an abstract poster image about deep ocean exploration"
@@ -147,7 +148,7 @@ Uses the ffmpeg binary bundled with `imageio-ffmpeg`, so no system install is ne
 quanai run "make a short promo video about our AI agent"
 ```
 
-- Pipeline: `plan.video` → `video.storyboard` (art + captions per scene) → `video.from_images`
+- Pipeline: `plan.video` → `video.storyboard` (art + caption cards, light veil so text reads) → `video.from_images`
 - Verified by: video stream present, duration, width
 - Falls back to an animated GIF if ffmpeg is truly unavailable
 
@@ -164,7 +165,8 @@ quanai run "build a desktop app for tracking my daily habits"
 | `electron` | `npm install && npm start` | HTML/CSS/JS with a secure preload bridge |
 
 Each generated app is complete: add / list / complete / search / progress / local
-persistence, empty states, and a README. Verified by file presence **and** a real
+persistence, empty states, and a README. The UI is light by default (near-white
+surfaces, dark text, blue accent) across every framework. Verified by file presence **and** a real
 `python_compile` or `node --check`.
 
 ### 5. Mobile applications
@@ -286,7 +288,11 @@ quanai tools                     # list the tool surface
 quanai doctor [--all]            # capabilities + model probe
 ```
 
-Global flags: `--workspace DIR`, `--home DIR`, `--provider NAME`, `--image-backend NAME`.
+Global flags (before or after the subcommand): `--workspace DIR`, `--home DIR`,
+`--provider NAME`, `--image-backend NAME`, `--theme NAME`.
+
+Deck themes are light by default — `paper` (default), `sky`, `mint`, `sand` — with
+dark palettes `midnight` / `forest` / `plum` available if you ask for them.
 
 Exit codes: `0` verified, `2` finished unverified, `1` error.
 
@@ -376,6 +382,7 @@ quanai/
 | `QUANAI_LLM_PROVIDER` | `auto` | `auto`, `offline`, `ollama`, `lmstudio`, `vllm`, `openai`, custom |
 | `QUANAI_BASE_URL` / `QUANAI_API_KEY` / `QUANAI_MODEL` | – | endpoint, key and model |
 | `QUANAI_IMAGE_BACKEND` | `auto` | `procedural`, `sd`, `pollinations` |
+| `QUANAI_THEME` | `paper` | deck palette: `paper`, `sky`, `mint`, `sand`, or a dark palette |
 | `QUANAI_ASR_CMD` | – | custom transcription command, e.g. `whisper {audio} --output_dir {output}` |
 | `QUANAI_ALLOW_SHELL` | `0` | enables `code.shell` (still denies destructive patterns) |
 | `QUANAI_ALLOW_NETWORK` | `0` | allows remote image generation |
@@ -401,7 +408,7 @@ repair behaviour, resume, and the CLI.
 
 - The offline content engine is template-driven and domain-aware, not a writer. With a
   language model installed the prose is noticeably better; the structure is the same.
-- Procedural images are abstract art generated from a prompt, not photorealistic
+- Procedural images are light abstract art generated from a prompt, not photorealistic
   text-to-image. Point `QUANAI_IMAGE_BACKEND=sd` at a local Stable Diffusion WebUI for that.
 - Video is a captioned slideshow with motion, not generative footage.
 - Speech-to-text needs a local engine; without one you still get waveform, spectrogram,

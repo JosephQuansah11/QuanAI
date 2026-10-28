@@ -104,47 +104,54 @@ class App(tk.Tk):
         super().__init__()
         self.title("$name")
         self.geometry("720x520")
-        self.configure(bg="#0f172a")
+        self.configure(bg="#f7f8fa")
         self.store = Store(DATA_FILE)
         self._build()
         self.refresh()
 
     def _build(self):
-        header = tk.Frame(self, bg="#0f172a")
+        header = tk.Frame(self, bg="#f7f8fa")
         header.pack(fill="x", padx=18, pady=(18, 8))
         tk.Label(header, text="$name", font=("Helvetica", 20, "bold"),
-                 fg="#f8fafc", bg="#0f172a").pack(side="left")
+                 fg="#111827", bg="#f7f8fa").pack(side="left")
         self.stats_label = tk.Label(header, text="", font=("Helvetica", 11),
-                                   fg="#94a3b8", bg="#0f172a")
+                                   fg="#6b7280", bg="#f7f8fa")
         self.stats_label.pack(side="right")
 
-        entry_row = tk.Frame(self, bg="#0f172a")
+        entry_row = tk.Frame(self, bg="#f7f8fa")
         entry_row.pack(fill="x", padx=18, pady=8)
-        self.entry = tk.Entry(entry_row, font=("Helvetica", 13), bg="#1e293b",
-                              fg="#f8fafc", insertbackground="#f8fafc", relief="flat")
+        self.entry = tk.Entry(entry_row, font=("Helvetica", 13), bg="#ffffff",
+                              fg="#111827", insertbackground="#111827", relief="flat",
+                              highlightthickness=1, highlightbackground="#d1d5db",
+                              highlightcolor="#2563eb")
         self.entry.pack(side="left", fill="x", expand=True, ipady=8, padx=(0, 8))
         self.entry.bind("<Return>", lambda event: self.on_add())
-        tk.Button(entry_row, text="Add", command=self.on_add, bg="#38bdf8",
-                  fg="#0f172a", relief="flat", font=("Helvetica", 12, "bold"),
-                  padx=18).pack(side="left")
+        tk.Button(entry_row, text="Add", command=self.on_add, bg="#2563eb",
+                  fg="#ffffff", activebackground="#1d4ed8", activeforeground="#ffffff",
+                  relief="flat", font=("Helvetica", 12, "bold"), padx=18).pack(side="left")
 
-        self.search = tk.Entry(self, font=("Helvetica", 11), bg="#111c30", fg="#cbd5e1",
-                               insertbackground="#cbd5e1", relief="flat")
+        self.search = tk.Entry(self, font=("Helvetica", 11), bg="#ffffff", fg="#111827",
+                               insertbackground="#111827", relief="flat",
+                               highlightthickness=1, highlightbackground="#d1d5db",
+                               highlightcolor="#2563eb")
         self.search.pack(fill="x", padx=18, pady=(0, 8), ipady=5)
         self.search.bind("<KeyRelease>", lambda event: self.refresh())
 
-        self.listbox = tk.Listbox(self, font=("Helvetica", 13), bg="#111c30", fg="#e2e8f0",
-                                  selectbackground="#1d4ed8", relief="flat",
-                                  activestyle="none", highlightthickness=0)
+        self.listbox = tk.Listbox(self, font=("Helvetica", 13), bg="#ffffff", fg="#111827",
+                                  selectbackground="#dbeafe", selectforeground="#111827",
+                                  relief="flat", activestyle="none", highlightthickness=1,
+                                  highlightbackground="#e5e7eb")
         self.listbox.pack(fill="both", expand=True, padx=18, pady=8)
         self.listbox.bind("<Double-Button-1>", lambda event: self.on_toggle())
 
-        footer = tk.Frame(self, bg="#0f172a")
+        footer = tk.Frame(self, bg="#f7f8fa")
         footer.pack(fill="x", padx=18, pady=(0, 16))
-        tk.Button(footer, text="Toggle done", command=self.on_toggle, bg="#1e293b",
-                  fg="#e2e8f0", relief="flat", padx=14, pady=6).pack(side="left")
-        tk.Button(footer, text="Delete", command=self.on_delete, bg="#1e293b",
-                  fg="#fca5a5", relief="flat", padx=14, pady=6).pack(side="left", padx=8)
+        tk.Button(footer, text="Toggle done", command=self.on_toggle, bg="#ffffff",
+                  fg="#374151", activebackground="#eef2f7", relief="flat", padx=14,
+                  pady=6).pack(side="left")
+        tk.Button(footer, text="Delete", command=self.on_delete, bg="#ffffff",
+                  fg="#dc2626", activebackground="#fee2e2", relief="flat", padx=14,
+                  pady=6).pack(side="left", padx=8)
 
     def refresh(self):
         self.listbox.delete(0, tk.END)
@@ -205,13 +212,15 @@ from PyQt6.QtWidgets import (
 
 DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
 STYLE = """
-QWidget { background: #0f172a; color: #e2e8f0; font-size: 14px; }
-QLineEdit { background: #1e293b; border: none; padding: 10px; border-radius: 6px; color: #f8fafc; }
-QPushButton { background: #38bdf8; color: #0f172a; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; }
-QPushButton#ghost { background: #1e293b; color: #e2e8f0; }
-QListWidget { background: #111c30; border: none; border-radius: 6px; padding: 6px; }
-QLabel#title { font-size: 22px; font-weight: bold; color: #f8fafc; }
-QLabel#stats { color: #94a3b8; }
+QWidget { background: #f7f8fa; color: #111827; font-size: 14px; }
+QLineEdit { background: #ffffff; border: 1px solid #d1d5db; padding: 10px; border-radius: 6px; color: #111827; }
+QLineEdit:focus { border: 1px solid #2563eb; }
+QPushButton { background: #2563eb; color: #ffffff; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; }
+QPushButton:hover { background: #1d4ed8; }
+QPushButton#ghost { background: #ffffff; color: #374151; border: 1px solid #d1d5db; }
+QListWidget { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 6px; }
+QLabel#title { font-size: 22px; font-weight: bold; color: #111827; }
+QLabel#stats { color: #6b7280; }
 """
 
 
@@ -371,7 +380,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 900,
     height: 640,
-    backgroundColor: "#0f172a",
+    backgroundColor: "#f7f8fa",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -500,38 +509,39 @@ window.api.list().then((rows) => {
 ''')
 
 APP_CSS = '''
-:root { color-scheme: dark; }
+:root { color-scheme: light; }
 * { box-sizing: border-box; }
 body {
   margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #0f172a; color: #e2e8f0; min-height: 100vh;
+  background: #f7f8fa; color: #111827; min-height: 100vh;
 }
 main { max-width: 720px; margin: 0 auto; padding: 24px 18px 96px; }
 header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-h1 { font-size: 22px; margin: 0 0 4px; color: #f8fafc; }
-#stats { color: #94a3b8; font-size: 13px; }
+h1 { font-size: 22px; margin: 0 0 4px; color: #111827; }
+#stats { color: #6b7280; font-size: 13px; }
 .row { display: flex; gap: 8px; margin: 18px 0 10px; }
 input[type="text"], input[type="search"] {
-  flex: 1; padding: 12px 14px; border-radius: 8px; border: none;
-  background: #1e293b; color: #f8fafc; font-size: 15px;
+  flex: 1; padding: 12px 14px; border-radius: 8px; border: 1px solid #d1d5db;
+  background: #ffffff; color: #111827; font-size: 15px;
 }
-input:focus { outline: 2px solid #38bdf8; }
+input:focus { outline: 2px solid #bfdbfe; border-color: #2563eb; }
 button {
   border: none; border-radius: 8px; padding: 12px 18px; cursor: pointer;
-  background: #38bdf8; color: #0f172a; font-weight: 700; font-size: 14px;
+  background: #2563eb; color: #ffffff; font-weight: 700; font-size: 14px;
 }
-button.ghost { background: #1e293b; color: #e2e8f0; }
+button:hover { background: #1d4ed8; }
+button.ghost { background: #ffffff; color: #374151; border: 1px solid #d1d5db; }
 ul { list-style: none; padding: 0; margin: 0; }
 li {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  background: #111c30; padding: 12px 14px; border-radius: 8px; margin-bottom: 8px;
-  animation: fade 160ms ease-out;
+  background: #ffffff; border: 1px solid #e5e7eb; padding: 12px 14px; border-radius: 8px;
+  margin-bottom: 8px; animation: fade 160ms ease-out;
 }
 @keyframes fade { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; } }
 li span { flex: 1; cursor: pointer; }
-li.done span { text-decoration: line-through; color: #64748b; }
-li .remove { background: transparent; color: #fca5a5; padding: 4px 8px; font-weight: 700; }
-li.empty { color: #64748b; justify-content: center; }
+li.done span { text-decoration: line-through; color: #9ca3af; }
+li .remove { background: transparent; color: #dc2626; padding: 4px 8px; font-weight: 700; }
+li.empty { color: #6b7280; justify-content: center; background: transparent; border-style: dashed; }
 footer { margin-top: 18px; display: flex; gap: 8px; }
 '''
 
@@ -728,9 +738,15 @@ class QuanApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFF7F8FA),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF38BDF8),
-          brightness: Brightness.dark,
+          seedColor: const Color(0xFF2563EB),
+          brightness: Brightness.light,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFFFFFFF),
+          foregroundColor: Color(0xFF111827),
+          elevation: 0,
         ),
       ),
       home: const HomePage(),
@@ -881,7 +897,7 @@ class _HomePageState extends State<HomePage> {
                                 style: entry.value.done
                                     ? const TextStyle(
                                         decoration: TextDecoration.lineThrough,
-                                        color: Colors.white54,
+                                        color: Colors.black45,
                                       )
                                     : null,
                               ),
@@ -987,7 +1003,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.root}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <View style={styles.header}>
         <Text style={styles.title}>@NAME@</Text>
         <Text style={styles.stats}>
@@ -1001,7 +1017,7 @@ export default function App() {
           onChangeText={setText}
           onSubmitEditing={add}
           placeholder="Add an entry"
-          placeholderTextColor="#64748b"
+          placeholderTextColor="#9ca3af"
         />
         <Pressable style={styles.button} onPress={add}>
           <Text style={styles.buttonText}>Add</Text>
@@ -1012,7 +1028,7 @@ export default function App() {
         value={query}
         onChangeText={setQuery}
         placeholder="Search"
-        placeholderTextColor="#64748b"
+        placeholderTextColor="#9ca3af"
       />
       <FlatList
         data={visible}
@@ -1038,20 +1054,22 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#0f172a', padding: 16 },
+  root: { flex: 1, backgroundColor: '#f7f8fa', padding: 16 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
     marginBottom: 16,
   },
-  title: { color: '#f8fafc', fontSize: 22, fontWeight: '700' },
-  stats: { color: '#94a3b8', fontSize: 13 },
+  title: { color: '#111827', fontSize: 22, fontWeight: '700' },
+  stats: { color: '#6b7280', fontSize: 13 },
   row: { flexDirection: 'row', gap: 8, marginBottom: 8 },
   input: {
     flex: 1,
-    backgroundColor: '#1e293b',
-    color: '#f8fafc',
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    color: '#111827',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
@@ -1059,24 +1077,26 @@ const styles = StyleSheet.create({
   },
   search: { marginBottom: 12 },
   button: {
-    backgroundColor: '#38bdf8',
+    backgroundColor: '#2563eb',
     borderRadius: 8,
     paddingHorizontal: 18,
     justifyContent: 'center',
   },
-  buttonText: { color: '#0f172a', fontWeight: '700' },
+  buttonText: { color: '#ffffff', fontWeight: '700' },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#111c30',
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
     borderRadius: 8,
     padding: 14,
     marginBottom: 8,
   },
-  itemText: { color: '#e2e8f0', fontSize: 15 },
-  done: { color: '#64748b', fontSize: 15, textDecorationLine: 'line-through' },
-  remove: { color: '#fca5a5', fontWeight: '700', paddingHorizontal: 8 },
-  empty: { color: '#64748b', textAlign: 'center', marginTop: 32 },
+  itemText: { color: '#111827', fontSize: 15 },
+  done: { color: '#9ca3af', fontSize: 15, textDecorationLine: 'line-through' },
+  remove: { color: '#dc2626', fontWeight: '700', paddingHorizontal: 8 },
+  empty: { color: '#6b7280', textAlign: 'center', marginTop: 32 },
 });
 '''
 
@@ -1086,8 +1106,8 @@ RN_APP_JSON = '''{
     "slug": "@SLUG@",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "dark",
-    "splash": { "backgroundColor": "#0f172a" },
+    "userInterfaceStyle": "light",
+    "splash": { "backgroundColor": "#f7f8fa" },
     "assetBundlePatterns": ["**/*"]
   }
 }
@@ -1121,10 +1141,10 @@ def _short_name(name: str, limit: int = 12) -> str:
     return name[:limit]
 
 
-def _icon(path: Path, size: int, name: str, accent: str = "#38bdf8") -> Path:
+def _icon(path: Path, size: int, name: str, accent: str = "#2563eb") -> Path:
     from PIL import Image, ImageDraw, ImageFont  # type: ignore
 
-    image = Image.new("RGB", (size, size), (15, 23, 42))
+    image = Image.new("RGB", (size, size), (247, 248, 250))
     draw = ImageDraw.Draw(image)
     pad = size // 8
     draw.rounded_rectangle(
@@ -1204,8 +1224,8 @@ def build_scaffold(
             "description": plan["description"],
             "start_url": "./index.html",
             "display": "standalone",
-            "background_color": "#0f172a",
-            "theme_color": "#38bdf8",
+            "background_color": "#f7f8fa",
+            "theme_color": "#2563eb",
             "icons": [
                 {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
                 {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
