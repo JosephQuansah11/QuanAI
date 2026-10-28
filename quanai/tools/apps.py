@@ -8,6 +8,7 @@ node and load in a browser, and Flutter ships a valid pubspec + widget tree.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from string import Template
 
@@ -1110,6 +1111,16 @@ def _tokenise(text: str, plan: dict) -> str:
     )
 
 
+def _short_name(name: str, limit: int = 12) -> str:
+    """Keep a PWA short name readable instead of cutting mid-word."""
+    if len(name) <= limit:
+        return name
+    first = re.match(r"^[A-Z][a-z]+", name)
+    if first and 3 <= len(first.group(0)) <= limit:
+        return first.group(0)
+    return name[:limit]
+
+
 def _icon(path: Path, size: int, name: str, accent: str = "#38bdf8") -> Path:
     from PIL import Image, ImageDraw, ImageFont  # type: ignore
 
@@ -1189,7 +1200,7 @@ def build_scaffold(
         write("sw.js", SW_JS.substitute(name=plan["name"], slug=plan["slug"]))
         manifest = {
             "name": plan["name"],
-            "short_name": plan["name"][:12],
+            "short_name": _short_name(plan["name"]),
             "description": plan["description"],
             "start_url": "./index.html",
             "display": "standalone",

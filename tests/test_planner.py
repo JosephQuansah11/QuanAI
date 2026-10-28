@@ -136,3 +136,11 @@ def test_reuse_is_skipped_when_a_tool_no_longer_exists(config, registry, memory)
         Objective.new("make a promo video about our agent")
     )
     assert rebuilt.source == "offline"
+
+
+def test_explicit_slide_count_is_honoured(planner):
+    plan = planner.plan(Objective.new("create a 5 slide deck about solar energy"))
+    plan_task = next(task for task in plan.tasks if task.tool == "plan.deck")
+    assert plan_task.args["slides"] == 5
+    requirement = next(req for req in plan.requirements if req.id == "R.deck")
+    assert requirement.checks[0].params["min_slides"] == 4

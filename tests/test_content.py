@@ -77,3 +77,20 @@ def test_image_prompts_are_varied_and_deterministic():
     assert first == second
     assert len({p["prompt"] for p in first}) == 3
     assert all("deep ocean" in p["prompt"] for p in first)
+
+
+def test_requested_slides_reads_the_number():
+    from quanai.content import requested_slides
+
+    assert requested_slides("create a 7 slide deck about solar") == 7
+    assert requested_slides("a 12-slide presentation") == 12
+    assert requested_slides("a deck about solar") == 8
+    assert requested_slides("a 2 slide deck") == 4  # clamped to a usable minimum
+    assert requested_slides("a 40 slide deck") == 24  # clamped to a sane maximum
+
+
+def test_bullets_come_from_the_subject_not_the_format_words():
+    plan = deck_plan("create a 7 slide powerpoint deck about solar energy adoption", 7)
+    body = " ".join(bullet for slide in plan.slides for bullet in slide.bullets).lower()
+    assert "solar energy" in body
+    assert "slide" not in body and "powerpoint" not in body and "deck" not in body

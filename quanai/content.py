@@ -261,12 +261,12 @@ def _fill(template: str, topic: str, kws: list[str]) -> str:
 SECTION_BANK: dict[str, list[tuple[str, list[str]]]] = {
     "technology": [
         ("Why {topic} matters now", [
-            "Adoption of {kw1} is moving from experiments into production budgets",
+            "Adoption of {topic} is moving from experiments into production budgets",
             "Tooling and infrastructure have matured enough to cut integration risk",
             "Teams that start now compound learning while standards are still forming",
         ]),
         ("Core building blocks", [
-            "Data layer: capture, clean and govern the inputs {kw1} depends on",
+            "Data layer: capture, clean and govern the inputs {topic} depends on",
             "Model layer: hosted APIs versus self-hosted {kw2}, chosen on cost and privacy",
             "Product layer: expose the capability through interfaces people already use",
         ]),
@@ -299,12 +299,12 @@ SECTION_BANK: dict[str, list[tuple[str, list[str]]]] = {
     ],
     "business": [
         ("The opportunity", [
-            "Demand for {kw1} is growing faster than the supply of reliable solutions",
+            "Demand for {topic} is growing faster than the supply of reliable solutions",
             "Existing alternatives are expensive, slow or hard to integrate",
             "A focused offer can win on speed and predictability",
         ]),
         ("Who we serve", [
-            "Primary segment: teams already spending on {kw1} today",
+            "Primary segment: teams already spending on {topic} today",
             "Secondary segment: buyers who avoided the category because of complexity",
             "Explicit anti-persona: customers needing bespoke compliance work",
         ]),
@@ -319,7 +319,7 @@ SECTION_BANK: dict[str, list[tuple[str, list[str]]]] = {
             "Break-even is reached at modest usage per account",
         ]),
         ("Competitive landscape", [
-            "Incumbents bundle {kw1} into large suites with long contracts",
+            "Incumbents bundle {topic} into large suites with long contracts",
             "New entrants optimise a single step of the workflow",
             "Our wedge is the verified end-to-end artifact",
         ]),
@@ -344,7 +344,7 @@ SECTION_BANK.update({
             "The skills transfer to further study and entry-level work",
         ]),
         ("Learning objectives", [
-            "Explain the core ideas of {kw1} in plain language",
+            "Explain the core ideas behind {topic} in plain language",
             "Apply them to one small but complete project",
             "Evaluate results against explicit criteria",
         ]),
@@ -360,7 +360,7 @@ SECTION_BANK.update({
             "Self-assessment against the published criteria",
         ]),
         ("Common misconceptions", [
-            "That {kw1} needs specialist equipment before you can begin",
+            "That {topic} needs specialist equipment before you can begin",
             "That correctness is the only measure of quality",
             "That one large attempt beats several small verified ones",
         ]),
@@ -377,7 +377,7 @@ SECTION_BANK.update({
     ],
     "health": [
         ("The problem", [
-            "Access to reliable information about {kw1} is uneven",
+            "Access to reliable information about {topic} is uneven",
             "Early signals are easy to miss without structured tracking",
             "Follow-through drops when guidance is generic",
         ]),
@@ -417,7 +417,7 @@ SECTION_BANK.update({
 SECTION_BANK.update({
     "environment": [
         ("The situation", [
-            "Pressure on {kw1} is increasing while budgets stay flat",
+            "Pressure to act on {topic} keeps growing while budgets stay flat",
             "Most waste is invisible because it is never measured",
             "Early action is far cheaper than late remediation",
         ]),
@@ -549,7 +549,8 @@ class DeckPlan:
 def deck_plan(request: str, slide_count: int = 8) -> DeckPlan:
     topic = topic_of(request)
     domain = detect_domain(request)
-    kws = keywords(request, 6) or [topic]
+    # keywords come from the subject, so format words never leak into bullets
+    kws = keywords(topic, 6) or [topic]
     bank = SECTION_BANK.get(domain) or SECTION_BANK["general"]
     slide_count = max(4, min(int(slide_count), 24))
 
@@ -595,7 +596,7 @@ def deck_plan(request: str, slide_count: int = 8) -> DeckPlan:
 
 def image_prompts(request: str, count: int = 3) -> list[dict]:
     topic = topic_of(request)
-    kws = keywords(request, 8) or [topic]
+    kws = keywords(topic, 8) or [topic]
     palettes = [
         ("deep indigo and amber", "editorial"),
         ("teal and warm sand", "minimal"),
@@ -632,7 +633,7 @@ def image_prompts(request: str, count: int = 3) -> list[dict]:
 
 def video_plan(request: str, scenes: int = 6, seconds_per_scene: float = 2.5) -> dict:
     topic = topic_of(request)
-    kws = keywords(request, 8) or [topic]
+    kws = keywords(topic, 8) or [topic]
     beats = [
         ("Opening question", f"What if {topic} took minutes instead of weeks?"),
         ("The problem", "Most of the time is lost before the real work starts"),
@@ -724,7 +725,7 @@ def app_plan(request: str, platform: str = "desktop", framework: str | None = No
     options = FRAMEWORKS[platform]
     framework = framework if framework in options else ("tkinter" if platform == "desktop" else "pwa")
     topic = topic_of(request)
-    kws = keywords(request, 6)
+    kws = keywords(topic, 6)
     name = pascal_case(topic)
     slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
     noun = kws[0] if kws else "item"
