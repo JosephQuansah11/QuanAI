@@ -96,3 +96,18 @@ def test_resume_from_the_cli(tmp_path: Path, capsys):
     assert main(_args(tmp_path, "resume", "obj-cliresume")) == 0
     assert (tmp_path / "ws/obj-cliresume/x.txt").exists()
     assert "100.0% verified" in capsys.readouterr().out
+
+
+def test_importing_the_package_does_not_run_the_cli():
+    import subprocess
+    import sys
+
+    result = subprocess.run(
+        [sys.executable, "-c", "import quanai.__main__; print('imported without running')"],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "imported without running" in result.stdout
+    assert "usage: quanai" not in result.stderr
