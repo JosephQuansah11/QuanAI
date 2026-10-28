@@ -133,6 +133,20 @@ def test_scaffold_and_compile_checks(verifier, vctx):
     assert not broken.ok and "syntax" in broken.detail.lower()
 
 
+def test_no_placeholders_scans_a_whole_project(verifier, vctx):
+    root = Path(vctx.workspace) / "proj"
+    (root / "lib").mkdir(parents=True)
+    (root / "main.py").write_text("print('real implementation')\n")
+    (root / "lib/core.js").write_text("export const value = 1;\n")
+    clean = verifier.run_check(Check("no_placeholders", {"path": "proj"}), vctx)
+    assert clean.ok, clean.detail
+
+    (root / "lib/core.js").write_text("export function todo() { throw new Error('TODO'); }\n")
+    dirty = verifier.run_check(Check("no_placeholders", {"path": "proj"}), vctx)
+    assert not dirty.ok
+    assert "core.js" in str(dirty.observed)
+
+
 def test_unknown_check_raises(verifier, vctx):
     from quanai.errors import CheckError
 

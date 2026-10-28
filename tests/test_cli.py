@@ -65,3 +65,34 @@ def test_resume_reports_missing_objective(tmp_path: Path):
     except FileNotFoundError:
         return
     raise AssertionError("expected FileNotFoundError for an unknown objective")
+
+
+def test_resume_from_the_cli(tmp_path: Path, capsys):
+    from quanai.config import Config
+    from quanai.core.agent import Agent
+    from quanai.core.task import Check, Objective, Requirement, Status, Task
+
+    config = Config(workspace=tmp_path / "ws", home=tmp_path / "state", provider="offline")
+    config.ensure_dirs()
+    agent = Agent(config, provider=None)
+    objective = Objective.new("resume demo")
+    objective.id = "obj-cliresume"
+    objective.workspace = str(config.objective_dir(objective.id))
+    objective.status = Status.RUNNING
+    objective.add_requirement(
+        Requirement(id="R1", text="file exists", checks=[Check("file_exists", {"path": "x.txt"})])
+    )
+    objective.add_task(
+        Task(
+            id="w",
+            title="write",
+            tool="fs.write",
+            args={"path": "x.txt", "content": "hello from resume"},
+            satisfies=["R1"],
+        )
+    )
+    agent.ledger.save(objective)
+
+    assert main(_args(tmp_path, "resume", "obj-cliresume")) == 0
+    assert (tmp_path / "ws/obj-cliresume/x.txt").exists()
+    assert "100.0% verified" in capsys.readouterr().out

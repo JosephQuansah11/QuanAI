@@ -509,6 +509,7 @@ class Planner:
                         Check("json_valid", {"path": "app/package.json", "keys": ["name"]})
                         if framework in {"electron", "react-native"}
                         else Check("file_exists", {"path": "app/README.md"}),
+                        Check("no_placeholders", {"path": "app"}),
                     ],
                 ),
                 _req(

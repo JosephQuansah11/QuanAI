@@ -94,14 +94,29 @@ def _text_contains(ctx: VerifyContext, path: str, needles: Any = None, min_chars
 
 @register_check("no_placeholders")
 def _no_placeholders(ctx: VerifyContext, path: str, max_hits: int = 0, **_: Any):
+    """Reject stub code and filler copy, in a single file or a whole project."""
     target = ctx.resolve(path)
     if not target.exists():
         return False, f"missing file: {path}", str(target)
-    text = target.read_text(encoding="utf-8", errors="replace")
-    pattern = re.compile(r"\b(TODO|FIXME|lorem ipsum|NotImplementedError|Coming soon)\b", re.I)
-    hits = pattern.findall(text)
+    pattern = re.compile(
+        r"\b(TODO|FIXME|lorem ipsum|NotImplementedError|Coming soon|placeholder text)\b", re.I
+    )
+    files = [target] if target.is_file() else [p for p in sorted(target.rglob("*")) if p.is_file()]
+    readable = {".py", ".js", ".ts", ".html", ".css", ".md", ".txt", ".json", ".yaml", ".yml", ".dart"}
+    hits: list[str] = []
+    scanned = 0
+    for file in files:
+        if file.suffix.lower() not in readable or file.stat().st_size > 512_000:
+            continue
+        try:
+            text = file.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        scanned += 1
+        for match in pattern.findall(text):
+            hits.append(f"{file.name}: {match}")
     ok = len(hits) <= int(max_hits)
-    return ok, f"{len(hits)} placeholder marker(s) in {path}", hits[:10]
+    return ok, f"{len(hits)} placeholder marker(s) across {scanned} file(s) in {path}", hits[:10]
 
 
 @register_check("json_valid")

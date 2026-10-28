@@ -388,7 +388,7 @@ quanai/
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest -q          # 90 tests, all offline
+python -m pytest             # 92 tests, all offline (about 15s)
 ```
 
 The suite covers the domain model, every check, every tool's real output, planning
